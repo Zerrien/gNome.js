@@ -1,0 +1,2 @@
+# gNome.js
+Genetic templating.
