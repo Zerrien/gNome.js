@@ -1,0 +1,196 @@
+<html>
+	<head>
+		<script src="./js.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			var area, pop;
+			function init() {
+				area = document.getElementById("output")
+				var g = gNome.makeGenome({
+					"traits":{
+						"colour":{
+							"wildcard":function() {
+								var tempG =  gNome.makeGenome({
+									"traits":{
+										"alpha":{
+											"wildcard":function() {
+												return Math.floor(Math.pow(2, 32) * Math.random()).toString(2).padLeft(32);
+											},
+											"fitness":function(_n) {
+												var perfection = "11111100000000000000000000111111";
+												var fitness = 0;
+												for(var i = 0; i < perfection.length; i++) {
+													if(perfection.charAt(i) == _n.charAt(i)) {
+														fitness++;
+													}
+												}
+												return fitness;
+											},
+											"crossover":function(_a, _b) {
+												var d = Math.floor(_a.length * Math.random());
+												var t = "";
+												for(var i = 0; i < _a.length; i++) {
+													if(i < d) {
+														t += _a.charAt(i);
+													} else {
+														t += _b.charAt(i);
+													}
+												}
+												return t;
+											},
+											"mutate":function(_a) {
+												if(Math.random() < 0.01) {
+													//Mutation occurs.
+													var index = Math.floor(_a.length * Math.random());
+													if(_a.charAt(index) == "0") {
+														_a = _a.replaceAt(index, "1");
+													} else {
+														_a = _a.replaceAt(index, "0");
+													}
+												}
+												return _a;
+											}
+										}
+									},
+									"selection": function(_pop) {
+										var n = this.val;
+										var tournamentSelect = new gNome.Population(_pop.genome);
+										for(var i = 0; i < n; i++) {
+											var tIndv = _pop.getRandomIndv();
+											while(tournamentSelect.findIndv(tIndv) != -1) {
+												tIndv = _pop.getRandomIndv();
+											}
+											tournamentSelect.addIndividual(tIndv);
+										}
+										return tournamentSelect.getFittest();
+									}
+								});
+								tempG.val = Math.floor(Math.random() * 10) + 1;
+								return tempG;
+							},
+							"fitness":function(_n) {
+								var pop = gNome.makePopulation(_n, {
+									"count":100
+								});
+								var genCount = 0;
+								while(pop.sumGeneration() * 1.25 < 100 * 32 && genCount < 100) {
+									pop.incrementGeneration();
+									genCount++;
+								}
+								//console.log(_n.val, pop.sumGeneration());
+								return 100 - genCount;
+							},
+							"crossover":function(_a, _b) {
+								var tChild = this.wildcard();
+								var rand = Math.floor(Math.random() * 3);
+								if(rand == 0) {
+									tChild.val = _a.val;
+								} else if (rand == 1) {
+									tChild.val = _b.val;
+								} else {
+									tChild.val = Math.floor((_a.val + _b.val)/2)	
+								}
+								return tChild;
+							}, 
+							"mutate":function(_a) {
+								if(Math.random() < 0.05) {
+									//_a.val = Math.floor(Math.random() * 10) + 1;
+								}
+								return _a;
+							}
+						},
+						/*
+						"efficiency":{
+							"wildcard":function() {
+								return Math.floor(Math.pow(2, 32) * Math.random()).toString(2).padLeft(32);
+							},
+							"fitness":function(_n) {
+								var perfection = "11111100000000000000000000111111";
+								var fitness = 0;
+								for(var i = 0; i < perfection.length; i++) {
+									if(perfection.charAt(i) == _n.charAt(i)) {
+										fitness++;
+									}
+								}
+								return fitness;
+							},
+							"crossover":function(_a, _b) {
+								var d = Math.floor(_a.length * Math.random());
+								var t = "";
+								for(var i = 0; i < _a.length; i++) {
+									if(i < d) {
+										t += _a.charAt(i);
+									} else {
+										t += _b.charAt(i);
+									}
+								}
+								return t;
+							},
+							"mutate":function(_a) {
+								if(Math.random() < 0.01) {
+									//Mutation occurs.
+									var index = Math.floor(_a.length * Math.random());
+									if(_a.charAt(index) == "0") {
+										_a = _a.replaceAt(index, "1");
+									} else {
+										_a = _a.replaceAt(index, "0");
+									}
+								}
+								return _a;
+							}
+						}
+						*/
+					},
+					"selection": function(_pop) {
+						var n = 5;
+						var tournamentSelect = new gNome.Population(_pop.genome);
+						for(var i = 0; i < n; i++) {
+							var tIndv = _pop.getRandomIndv();
+							while(tournamentSelect.findIndv(tIndv) != -1) {
+								tIndv = _pop.getRandomIndv();
+							}
+							tournamentSelect.addIndividual(tIndv);
+						}
+						return tournamentSelect.getFittest();
+					}
+				});
+				pop = gNome.makePopulation(g, {
+					"count":25
+				});
+
+				output.value = pop.sumGeneration();
+				console.log(pop.getFittest().traits.colour.val);
+				/*
+				pop.incrementGeneration();
+				output.value = pop.sumGeneration() + "\n" + output.value;
+				pop.incrementGeneration();
+				output.value = pop.sumGeneration() + "\n" + output.value;
+				*/
+
+				//pop.incrementGeneration();
+				//output.value = pop.sumGeneration() + "\n" + output.value;
+				/*
+				setInterval(function() {
+					pop.incrementGeneration();
+					output.value = pop.sumGeneration() + "\n" + output.value;
+				}, 100);
+				*/
+				
+			}
+			function doot() {
+				pop.incrementGeneration();
+				output.value = pop.sumGeneration() + "\n" + output.value;
+				console.log(pop.getFittest().traits.colour.val);
+			}
+		</script>
+	</head>
+	<body onload="init()">
+		<textarea id="output"></textarea>
+		<button id="presser" onclick="doot()">Doot</button>
+	</body>
+</html>
+<style>
+	textarea {
+		width: 256px;
+		height: 256px;
+	}
+</style>
