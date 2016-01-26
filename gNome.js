@@ -11,7 +11,6 @@
 		A population.
 	individual
 		An individual.
-
 */
 var gNome = gnome = {
 	Genome : function() {
@@ -25,12 +24,22 @@ var gNome = gnome = {
 		};
 		this.setSelection = function(_function) {
 			this.selection = _function;
+		};
+		this.makePopulation = function(_count) {
+			var pop = new gNome.Population(this);
+			_count = _count || 1;
+			while(_count -- > 0) {
+				pop.createIndividual();
+			}
+			return pop;
 		}
 	},
 	Population : function(_genome) {
 		this.gNome = this.gnome = gNome;
 		this.individuals = [];
 		this.genome = _genome || null;
+		this.lineage = [];
+		this.generation = 0;
 		this.createIndividual = function(_n) {
 			_n = _n || 1;
 			while(_n-- > 0) {
@@ -41,12 +50,17 @@ var gNome = gnome = {
 		};
 		this.incrementGeneration = function() {
 			var tIndividuals = [];
-			i = 0;
-			while(i++ < this.individuals.length) {
+			for(var i = 0; i < this.individuals.length; i++) {
 				var iA = this.genome.selection(this);
 				var iB = this.genome.selection(this);
-				while(iB == iA) {
+				var safetyIndex = 0;
+				while(iB == iA && safetyIndex < 100) {
 					iB = this.genome.selection(this);
+					safetyIndex++;
+				}
+				if(safetyIndex == 100) {
+					throw new Error("iA and iB are always the same." +
+						"\nDoes the selection function return 2 unique individuals?")
 				}
 				var tIndv = new this.gNome.Individual(this.genome);
 				for(var traitName in this.genome.traits) {
@@ -55,14 +69,16 @@ var gNome = gnome = {
 				}
 				tIndividuals.push(tIndv);
 			}
+			this.lineage[this.generation] = [];
 			for(var i = 0; i < tIndividuals.length; i++) {
+				this.lineage[this.generation].push(this.individuals[i]);
 				this.individuals[i] = tIndividuals[i];
 			}
-		};
+		}
 		this.sumGeneration = function() {
 			var sum = 0;
 			for(var i = 0; i < this.individuals.length; i++) {
-				sum += this.individuals[i].getFitness();
+				//sum += this.individuals[i].getFitness();
 			}
 			return sum;
 		};
@@ -82,8 +98,8 @@ var gNome = gnome = {
 			}
 			return fittest;
 		};
-		this.findIndv = function(_i) {
-			return this.individuals.indexOf(_i);
+		this.findIndv = function(_indv) {
+			return this.individuals.indexOf(_indv);
 		};
 		this.getRandomIndv = function() {
 			return this.individuals[Math.floor(this.individuals.length * Math.random())]
@@ -93,18 +109,28 @@ var gNome = gnome = {
 		this.gNome = this.gnome = gNome;
 		this.traits = {};
 		this.genome = _genome;
-		
+		this.fitness = null
 		this.getFitness = function() {
-			var fitness = 0;
-			for(var traitName in this.traits) {
-				fitness += this.genome.traits[traitName].fitness(this.traits[traitName]);
+			if(this.fitness == null) {
+				var tFit = 0;
+				for(var traitName in this.traits) {
+					if(typeof this.genome.traits[traitName].fitness(this.traits[traitName]) === "number") {
+						tFit += this.genome.traits[traitName].fitness(this.traits[traitName]);
+					} else {
+						throw new Error("Fitness function returned non-number:" +
+							"\nTrait Name: " + traitName + 
+							"\nValue: " + this.genome.traits[traitName].fitness(this.traits[traitName]));
+					}
+				}
+				this.fitness = tFit;
 			}
-			return fitness;
+			return this.fitness;
 		};
 		this.wildcard = function() {
 			for(var traitName in _genome.traits) {
 				this.traits[traitName] = _genome.traits[traitName].wildcard();
 			}
+			this.fitness = null;
 		};
 	},
 	makeGenome : function(_rules) {
@@ -116,13 +142,6 @@ var gNome = gnome = {
 		}
 		genome.setSelection(_rules.selection);
 		return genome;
-	},
-	makePopulation : function(_genome, _rules) {
-		var population = new this.Population(_genome);
-		//Parse rules here.
-		//Todo: pull from parameter instead of hardcoding.
-		population.createIndividual(_rules.count);
-		return population;
 	}
 }
 String.prototype.padLeft = function(_len, _c) {

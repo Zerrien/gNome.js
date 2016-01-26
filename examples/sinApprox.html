@@ -3,12 +3,14 @@
 		<script src="../gNome.js" type="text/javascript"></script>
 		<script type="text/javascript">
 			var g;
+			var curGenDiv;
 			function init() {
+				curGenDiv = document.getElementById("curGeneration");
 				g = gNome.makeGenome({
 					"traits":{
-						"position":{
+						"xPosition":{
 							"wildcard":function() {
-								return -5 + (10+5) * Math.random();
+								return -100 + 200 * Math.random();
 							},
 							"fitness":function(_trait) {
 								return blackBox(_trait);
@@ -29,9 +31,9 @@
 							"mutate":function(_trait) {
 								if(Math.random() < 0.01) {
 									if(Math.random() < 0.5) {
-										_trait += Math.random() * 0.5;
+										_trait += Math.random();
 									} else {
-										_trait -= Math.random() * 0.5;
+										_trait -= Math.random();
 									}
 								}
 								return _trait;
@@ -39,7 +41,7 @@
 						}
 					},
 					"selection":function(_pop) {
-						var n = 10;
+						var n = 4;
 						var tournamentSelect = new gNome.Population(_pop.genome);
 						for(var i = 0; i < n; i++) {
 							var tIndv = _pop.getRandomIndv();
@@ -51,15 +53,12 @@
 						return tournamentSelect.getFittest();
 					}
 				});
-				var pop = gNome.makePopulation(g,{
-					"count":1000
-				});
-				console.log(pop.getFittest().getFitness());
+				var pop = g.makePopulation(20);
 				
 				setInterval(function() {
+					curGeneration.innerHTML = pop.getFittest().traits.xPosition.toFixed(13);
 					pop.incrementGeneration();
-					console.log((1.8109142345802 - pop.getFittest().traits.position).toFixed(16), pop.getFittest().traits.position, pop.getFittest().getFitness());
-				}, 100)
+				}, 10)
 			}
 			function blackBox(_x) {
 				//_x to max(f(x)) ~= 1.8109142345802
@@ -68,5 +67,69 @@
 		</script>
 	</head>
 	<body onload="init()">
+		<div id="textContainer">
+			<div>
+				gNome.js Genetics Algorithm Demo
+			</div>
+			<div>
+				Equation Maximum Detection
+			</div>
+			<div>
+				f(x) = (-1 * pow(x - 3, 2) / 10) + sin(x) + 3;
+			</div>
+		</div>
+		<div id="box">
+			<div style="border-top-left-radius:8px;border-top-right-radius:8px" class="infoBox">
+				Current value:
+			</div>
+			<div id="curGeneration">
+				-
+			</div>
+			<div id="hiddenSolution">
+				1.8109142345802
+			</div>
+			<div style="border-bottom-left-radius:8px;border-bottom-right-radius:8px" class="infoBox">
+				Actual Solution<br>
+				(Mouse Over)
+			</div>
+		</div>
 	</body>
 </html>
+<style>
+	#textContainer {
+		text-align: center;
+		margin:0.5em;
+	}
+	html {
+		font-family: monospace;
+	}
+	#box {
+		margin:0 auto;
+		width:50%;
+		background-color:rgba(0, 0, 0, 0.25);
+		border-radius: 16px;
+		padding:0.5em;
+
+	}
+	.infobox {
+		width:75%;
+		background:rgba(0, 0, 0, 0.25);
+		text-align:center;
+		margin:0 auto;
+	}
+	#curGeneration {
+		width:75%;
+		background:white;
+		text-align:center;
+		margin: 0 auto;
+	}
+	#hiddenSolution {
+		background:black;
+		width:75%;
+		text-align:center;
+		margin: 0 auto;
+	}
+	#hiddenSolution:hover {
+		color:white;
+	}
+</style>
