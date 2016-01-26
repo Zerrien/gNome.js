@@ -1,0 +1,106 @@
+<html>
+	<head>
+		<script src="../gNome.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			var g;
+			function init() {
+				g = gNome.makeGenome({
+					traits:{
+						color:{
+							wildcard:function() {
+								var potentialColors = [{
+									border:"red",
+									inner:"yellow"
+								}, {
+									border:"blue",
+									inner:"green"
+								}];
+								return potentialColors[Math.floor(potentialColors.length * Math.random())];
+							},
+							fitness:function(_trait) {
+								//Just to keep it random.
+								return 0;
+							},
+							crossover:function(_a, _b) {
+								var obj = {border:null, inner:null}
+								if(Math.random() < 0.5) {
+									obj.border = _a.border;
+								} else {
+									obj.border = _b.border;
+								}
+								if(Math.random() < 0.5) {
+									obj.inner = _a.inner;
+								} else {
+									obj.inner = _b.inner;
+								}
+								return obj;
+							},
+							mutate:function(_trait) {
+								return _trait;
+							}
+
+						}
+					},
+					selection:function(_pop) {
+						var n = 2;
+						var tournamentSelect = new gNome.Population(_pop.genome);
+						for(var i = 0; i < n; i++) {
+							var tIndv = _pop.getRandomIndv();
+							while(tournamentSelect.findIndv(tIndv) != -1) {
+								tIndv = _pop.getRandomIndv();
+							}
+							tournamentSelect.addIndividual(tIndv);
+						}
+						return tournamentSelect.getFittest();
+					}
+				});
+				var pop = g.makePopulation(200);
+				setInterval(function() {
+					var container = document.getElementById("container")
+					while(container.firstChild) {
+						container.removeChild(container.firstChild)
+					}
+					pop.incrementGeneration();
+					for(var i = 0; i < pop.individuals.length; i++) {
+						var indv = pop.individuals[i];
+						var div = document.createElement("div");
+						//console.log(indv.traits.color);
+						div.className = "plant " + indv.traits.color.inner + " border-" + indv.traits.color.border;
+						document.getElementById("container").appendChild(div);
+					}
+				}, 10)
+			}
+		</script>
+	</head>
+	<body onload="init()">
+		<div id="container">
+		</div>
+	</body>
+</html>
+<style>
+	#container {
+
+	}
+	.plant {
+		box-sizing: border-box;
+    	-moz-box-sizing: border-box;
+    	-webkit-box-sizing: border-box;
+		width:32px;
+		height:32px;
+		float:left;
+		border:1px solid black;
+	}
+	.green {
+		background-color: green;
+	}
+	.yellow {
+		background-color: yellow;
+	}
+	.border-red {
+		border-color:red;
+	}
+	.border-blue {
+		border-color:blue;
+	}
+
+</style>
