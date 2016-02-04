@@ -69,16 +69,18 @@ var gNome = gnome = {
 				}
 				tIndividuals.push(tIndv);
 			}
-			this.lineage[this.generation] = [];
+			this.lineage[this.generation] = new this.genome.makePopulation(0);
+			this.lineage[this.generation].individuals = [];
 			for(var i = 0; i < tIndividuals.length; i++) {
-				this.lineage[this.generation].push(this.individuals[i]);
+				this.lineage[this.generation].individuals.push(this.individuals[i]);
 				this.individuals[i] = tIndividuals[i];
 			}
+			this.generation++;
 		}
 		this.sumGeneration = function() {
 			var sum = 0;
 			for(var i = 0; i < this.individuals.length; i++) {
-				//sum += this.individuals[i].getFitness();
+				sum += this.individuals[i].getFitness();
 			}
 			return sum;
 		};
@@ -111,7 +113,7 @@ var gNome = gnome = {
 		this.genome = _genome;
 		this.fitness = null
 		this.getFitness = function() {
-			if(this.fitness == null) {
+			if(this.fitness === null) {
 				var tFit = 0;
 				for(var traitName in this.traits) {
 					if(typeof this.genome.traits[traitName].fitness(this.traits[traitName]) === "number") {
