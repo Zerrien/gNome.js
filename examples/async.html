@@ -1,0 +1,97 @@
+<html>
+	<head>
+		<script src="../gNome.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			var g, pop;
+			function init() {
+				g = gNome.makeGenome({
+					traits:{
+						color:{
+							wildcard:function() {
+								return ["green", "red"][Math.floor(Math.random() * 2)];
+							},
+							fitness:function(_trait) {
+								return 0;
+							},
+							crossover:function(_a, _b) {
+								return _a;
+							},
+							mutate:function(_trait) {
+								return _trait;
+							}
+						}
+					},
+					selection:function(_pop) {
+						var n = 4;
+						var tournamentSelect = new gNome.Population(_pop.genome);
+						for(var i = 0; i < n; i++) {
+							var tIndv = _pop.getRandomIndv();
+							while(tournamentSelect.findIndv(tIndv) != -1) {
+								tIndv = _pop.getRandomIndv();
+							}
+							tournamentSelect.addIndividual(tIndv);
+						}
+						return tournamentSelect.getFittest();
+					},
+					async:true
+				});
+				pop = g.makePopulation(25);
+				console.log(redGreen());
+				drawIndv(pickNullfit());
+			}
+			function drawIndv(_indv) {
+				while(document.body.firstChild) {
+					document.body.removeChild(document.body.firstChild);
+				}
+				if(_indv) {
+					var divColor = document.createElement('div');
+					divColor.style.backgroundColor = _indv.traits.color;
+					divColor.style.width = "128px";
+					divColor.style.height = "128px";
+					document.body.appendChild(divColor);
+					var yesButton = document.createElement('button');
+					yesButton.style.width = "64px";
+					yesButton.style.float = "left";
+					yesButton.innerHTML = "Yes!";
+					document.body.appendChild(yesButton);
+					var noButton = document.createElement('button');
+					noButton.style.width = "64px";
+					noButton.style.float = "left";
+					noButton.innerHTML = "No!";
+					document.body.appendChild(noButton);
+					yesButton.onclick = function(_e) {
+						_indv.fitness = 1;
+						drawIndv(pickNullfit());
+					}
+					noButton.onclick = function(_e) {
+						_indv.fitness = 0;
+						drawIndv(pickNullfit());
+					}
+				} else {
+					pop.incrementGeneration();
+					console.log(redGreen());
+					drawIndv(pickNullfit());
+				}
+			}
+			function redGreen() {
+				var sum = 0;
+				for(var i = 0; i < pop.individuals.length; i++) {
+					if(pop.individuals[i].traits.color === "green") {
+						sum++;
+					}
+				}
+				return sum;
+			}
+			function pickNullfit() {
+				for(var i = 0; i < pop.individuals.length; i++) {
+					if(pop.individuals[i].fitness === null) {
+						return pop.individuals[i];
+					}
+				}
+				return null;
+			}
+		</script>
+	</head>
+	<body onload="init()">
+	</body>
+</html>

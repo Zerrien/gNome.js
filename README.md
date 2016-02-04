@@ -36,6 +36,7 @@ console.log(basePop.sumGeneration()); //Hopefully this is larger than the previo
 
 ## Terminology:
 Trait: Anything! A Number, an Array, an Object. This is what you will use to judge fitness, what will be transferred to children, and what can be mutated to offer diversity to the genome.
+
 Fitness: How 'good' something is. For example, an object that consumes less resource than another object would have a higher fitness. In another case, having more value than another may result in a higher fitness.
 
 ## Examples:

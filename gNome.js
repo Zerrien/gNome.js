@@ -141,6 +141,7 @@ var gNome = gnome = {
 			genome.addTrait(traitName, _rules.traits[traitName]);
 		}
 		genome.setSelection(_rules.selection);
+		genome.async = _rules.async;
 		return genome;
 	}
 }
