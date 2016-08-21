@@ -143,18 +143,6 @@ var gNome = gnome = {
 			genome.addTrait(traitName, _rules.traits[traitName]);
 		}
 		genome.setSelection(_rules.selection);
-		genome.async = _rules.async;
 		return genome;
 	}
-}
-String.prototype.padLeft = function(_len, _c) {
-	var s = this, _c = _c || "0";
-	s += "";
-	while(s.length < _len) {
-		s = _c + s;
-	}
-	return s;
-}
-String.prototype.replaceAt = function(_index, _char) {
-	return this.substr(0, _index) + _char + this.substr(_index + _char.length);
 }

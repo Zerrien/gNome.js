@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<script src="../gNome.js"></script>
+		<script>
+			var cowTemplate, g, pop;
+			function init() {
+				cowTemplate = document.getElementById("cowTemplate");
+				g = gNome.makeGenome({
+					traits:{
+						lifespan:{
+							wildcard:function() {
+								return 10;
+							},
+							fitness:function(trait) {
+								console.log(this);
+								return 0;
+							},
+							crossover:function(a, b) {
+								return a;
+							},
+							mutate:function(trait) {
+								return trait;
+							}
+						}
+					},
+					selection: function(_pop) {
+						var n = 4;
+						var tournamentSelect = new gNome.Population(_pop.genome);
+						for(var i = 0; i < n; i++) {
+							var tIndv = _pop.getRandomIndv();
+							while(tournamentSelect.findIndv(tIndv) != -1) {
+								tIndv = _pop.getRandomIndv();
+							}
+							tournamentSelect.addIndividual(tIndv);
+						}
+						return tournamentSelect.getFittest();
+					}
+				});
+				pop = g.makePopulation(25);
+			}
+		</script>
+	</head>
+	<body onload="init()">
+	</body>
+	<template id="cowTemplate">
+	</template>
+</html>
